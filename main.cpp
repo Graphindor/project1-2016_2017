@@ -14,12 +14,13 @@
 using namespace std;
 
 typedef int vertex_t;
-struct neighbor {
-    vertex_t target;
-    neighbor(vertex_t arg_target)
-        : target(arg_target) { }
+
+struct nodo {
+    vector <int> vicini;
+    bool visited=false; 
 };
-typedef vector<vector<neighbor> > adjacency_list_t;
+typedef vector<nodo>  adjacency_list;
+
 /*
 void AddToAdjacencyList(adjacency_list_t &adjacency_list, vector<pair<pair<int,int>,int> > &v, int index)
 {
@@ -33,6 +34,7 @@ void AddToAdjacencyList(adjacency_list_t &adjacency_list, vector<pair<pair<int,i
         adjacency_list[v[index].first.first].push_back(neighbor(v[index].first.second,v[index].second));
 }
 void dfs(int x, adjacency_list_t &ls)
+
 {
     state[x] = 1;
     cout << "x==>> " << x << endl;
@@ -76,12 +78,70 @@ vector <neighbor> GetCycle ()
     return cycle;
 }
 */
+void DFS (adjacency_list &GRAFO, int u, vector <int> &ordineVisita, vector<vector<int>> &cycleList){
+
+	GRAFO[u].visited = true;
+	for(int k:GRAFO[u].vicini)
+	{
+
+		if((!GRAFO[k].visited)&&(GRAFO[k].vicini.size()!=0))
+		{
+			ordineVisita.push_back(k);
+			DFS(GRAFO,k,ordineVisita,cycleList);
+		}
+		else 
+		{
+			if((ordineVisita.size()-2)==k){
+				continue;
+			}
+			
+			vector<int>::iterator indx=find(ordineVisita.begin(),ordineVisita.end(),k);
+			vector<int> newVec(indx,ordineVisita.end());
+
+			cycleList.push_back(newVec);
+
+		}
+	}
+
+
+
+
+
+
+}
+
+vector<vector<int>> GetCycles(adjacency_list GRAFO){
+
+	vector<vector<int>> cycleList;
+	vector<int> ordineVisita;
+
+	ordineVisita.push_back(0);
+	DFS(GRAFO,0,ordineVisita,cycleList);
+
+
+
+
+
+return cycleList;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 int main(){
 
-	ifstream in("input.txt");
+	ifstream in("input3.txt");
 
     ofstream out("output.txt");
 
@@ -89,7 +149,7 @@ int main(){
 
     in >> M >> L;
 
-    adjacency_list_t GRAFO;
+    adjacency_list GRAFO;
     GRAFO.resize(M);
 
     for(int i=0; i<	L;i++){
@@ -98,22 +158,30 @@ int main(){
 
     	in >> tmp;
     	in >> dest;
-    	GRAFO[tmp].push_back(neighbor(dest));
-    	GRAFO[dest].push_back(neighbor(tmp));
+    	GRAFO[tmp].vicini.push_back(dest);
+    	GRAFO[dest].vicini.push_back(tmp);
 
    }
+
+
+vector<vector<int>> cycleList;
+cycleList = GetCycles(GRAFO);
+
 for(int k=0;k<M;k++){
 	cout << k << ": ";
-	for(int t=0;t<GRAFO[k].size();t++)
+	for(int t=0;t<GRAFO[k].vicini.size();t++)
 	{
-		cout << GRAFO[k][t].target << " " ;
+		cout << GRAFO[k].vicini[t] << " " ;
 	}
 	cout << endl;
 
 }
-
-
-
+for(int i=0;i<cycleList.size();i++){
+	for(int t=0;cycleList[i].size();t++){
+		cout << cycleList[i][t] << " ";
+	}
+	cout << endl;
+}
 
 
 
