@@ -22,6 +22,7 @@ void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& li
 		{
 			ordineVisita.push_back(k);
 			DFS(GRAFO, k, ordineVisita, listaCicli);
+			ordineVisita.pop_back();
 		}
 		else
 		{
@@ -30,7 +31,8 @@ void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& li
 				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
 
-				listaCicli.push_back(toPush);
+				if(!toPush.empty())
+					listaCicli.push_back(toPush);
 			}
 		}
 	}
