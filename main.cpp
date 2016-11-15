@@ -15,28 +15,21 @@ typedef vector<nodo> grafo;
 // Le sposteremo
 void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli)
 {
-	cout << ordineVisita.size() << " @ ";
-	for(int i:ordineVisita)
-		cout << i << " ";
-
-	cout << endl;
 	GRAFO[u].visited = true;
 	for(int k:GRAFO[u].neighbor)
 	{
-		if(!GRAFO[k].visited && (GRAFO[k].neighbor.size() < 1))
+		if(!GRAFO[k].visited && !(GRAFO[k].neighbor.empty()))
 		{
 			ordineVisita.push_back(k);
 			DFS(GRAFO, k, ordineVisita, listaCicli);
 		}
 		else
 		{
-			if(k != ordineVisita[ordineVisita.size() - 1])
+			if(k != ordineVisita[ordineVisita.size() - 2])
 			{
 				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
-				for(int i:toPush)
-					cout << i << " ";
-				cout << endl;
+
 				listaCicli.push_back(toPush);
 			}
 		}
@@ -85,7 +78,7 @@ int main()
 	vector<vector<int>> listaCicli = getCycles(GRAFO);
 
 	cout << "=== CHECK CICLI ===" << endl;
-	cout << "size(): " << listaCicli.size();
+	cout << "size(): " << listaCicli.size() << endl;
 
 	for(vector<int> v:listaCicli)
 	{
