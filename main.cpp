@@ -1,189 +1,99 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <list>
-
-#include <limits> // for numeric_limits
-
-#include <set>
-#include <utility> // for pair
-#include <algorithm>
-#include <iterator>
-#include <new>
 #include <fstream>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
-typedef int vertex_t;
-
 struct nodo {
-    vector <int> vicini;
-    bool visited=false; 
+	vector<int> neighbor;
+	bool visited = false;
 };
-typedef vector<nodo>  adjacency_list;
 
-/*
-void AddToAdjacencyList(adjacency_list_t &adjacency_list, vector<pair<pair<int,int>,int> > &v, int index)
+typedef vector<nodo> grafo;
+
+// Le sposteremo
+void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli)
 {
-    bool found = false;
+	cout << ordineVisita.size() << " @ ";
+	for(int i:ordineVisita)
+		cout << i << " ";
 
-    for(int i = 0; i < adjacency_list[v[index].first.first].size() && found == false; i++)
-        if(adjacency_list[v[index].first.first][i].target == v[index].first.second)
-            found = true;
-
-    if(found == false)
-        adjacency_list[v[index].first.first].push_back(neighbor(v[index].first.second,v[index].second));
-}
-void dfs(int x, adjacency_list_t &ls)
-
-{
-    state[x] = 1;
-    cout << "x==>> " << x << endl;
-    cout << "I'm visiting " << x << " with size => " << ls[x].size() << endl;
-    if(ls[x].size() > 0)
-    for(int j = 0; j < ls[x].size(); j++)
-    {
-        cout << "ls[" << x << "][" << j << "].target => " << ls[x][j].target << endl;
-        cout << "parent[" << x << "].target => " << parent[x].target << endl;
-        if(state[ls[x][j].target] == 1 && parent[x].target != ls[x][j].target)
-        {
-            cout << "Closed cycle since state[ls["<< x <<"]["<<j<<"].target] => " << state[ls[x][j].target] << endl;
-            parent[ls[x][j].target].target = x;
-            theNodeInTheCycle = ls[x][j].target; //ls[x][j] belongs to the cycle since state[ls[x][j]]==1
-            t = 0;
-        }
-        if(state[ls[x][j].target] == 0)// && parent[x].target != -1)
-        {
-            parent[ls[x][j].target].target = x;
-            dfs(ls[x][j].target, ls);
-        }
-    }
-}
-
-vector <neighbor> GetCycle ()
-{
-    vector <neighbor> cycle;
-    int firstNodeInTheCycle = theNodeInTheCycle;
-    do
-    {
-            theNodeInTheCycle = parent[theNodeInTheCycle].target;
-            theWeightInTheCycle = parent[theNodeInTheCycle].weight;
-            cycle.push_back (neighbor(theNodeInTheCycle,theWeightInTheCycle));
-            cout << "theNodeInTheCycle => " << theNodeInTheCycle << " firstNodeInTheCycle => " << firstNodeInTheCycle << endl;
-    } while (theNodeInTheCycle != firstNodeInTheCycle && theNodeInTheCycle != -1);
-
-    reverse(cycle.begin(), cycle.end()); //to get them in the right order
-    if(theNodeInTheCycle == -1)
-        cycle.clear();
-
-    return cycle;
-}
-*/
-void DFS (adjacency_list &GRAFO, int u, vector <int> &ordineVisita, vector<vector<int>> &cycleList){
-
+	cout << endl;
 	GRAFO[u].visited = true;
-	for(int k:GRAFO[u].vicini)
+	for(int k:GRAFO[u].neighbor)
 	{
-
-		if((!GRAFO[k].visited)&&(GRAFO[k].vicini.size()!=0))
+		if(!GRAFO[k].visited && (GRAFO[k].neighbor.size() < 1))
 		{
 			ordineVisita.push_back(k);
-			DFS(GRAFO,k,ordineVisita,cycleList);
+			DFS(GRAFO, k, ordineVisita, listaCicli);
 		}
-		else 
+		else
 		{
-			if((ordineVisita.size()-2)==k){
-				continue;
+			if(k != ordineVisita[ordineVisita.size() - 1])
+			{
+				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
+				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
+				for(int i:toPush)
+					cout << i << " ";
+				cout << endl;
+				listaCicli.push_back(toPush);
 			}
-			
-			vector<int>::iterator indx=find(ordineVisita.begin(),ordineVisita.end(),k);
-			vector<int> newVec(indx,ordineVisita.end());
-
-			cycleList.push_back(newVec);
-
 		}
 	}
-
-
-
-
-
-
 }
 
-vector<vector<int>> GetCycles(adjacency_list GRAFO){
-
-	vector<vector<int>> cycleList;
+vector<vector<int>> getCycles(grafo GRAFO)
+{
+	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
 
 	ordineVisita.push_back(0);
-	DFS(GRAFO,0,ordineVisita,cycleList);
+	DFS(GRAFO, 0, ordineVisita, listaCicli);
 
-
-
-
-
-return cycleList;
+	return listaCicli;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int main(){
-
+int main()
+{
 	ifstream in("input3.txt");
 
-    ofstream out("output.txt");
+	int M, L;
+	in >> M >> L;
 
-    int M, L;
+	grafo GRAFO(M);
 
-    in >> M >> L;
-
-    adjacency_list GRAFO;
-    GRAFO.resize(M);
-
-    for(int i=0; i<	L;i++){
-    	int tmp;
-    	int dest;
-
-    	in >> tmp;
-    	in >> dest;
-    	GRAFO[tmp].vicini.push_back(dest);
-    	GRAFO[dest].vicini.push_back(tmp);
-
-   }
-
-
-vector<vector<int>> cycleList;
-cycleList = GetCycles(GRAFO);
-
-for(int k=0;k<M;k++){
-	cout << k << ": ";
-	for(int t=0;t<GRAFO[k].vicini.size();t++)
+	for(int i = 0; i < L; i++)
 	{
-		cout << GRAFO[k].vicini[t] << " " ;
+		int src, dest;
+		in >> src >> dest;
+
+		GRAFO[src].neighbor.push_back(dest);
+		GRAFO[dest].neighbor.push_back(src);
 	}
-	cout << endl;
 
-}
-for(int i=0;i<cycleList.size();i++){
-	for(int t=0;cycleList[i].size();t++){
-		cout << cycleList[i][t] << " ";
+	cout << "=== CHECK GRAFO ===" << endl;
+	for(unsigned int i = 0; i < GRAFO.size(); i++)
+	{
+		cout << i << ": ";
+		for(int j:GRAFO[i].neighbor)
+			cout << j << " ";
+
+		cout << endl;
 	}
-	cout << endl;
-}
 
+	vector<vector<int>> listaCicli = getCycles(GRAFO);
 
+	cout << "=== CHECK CICLI ===" << endl;
+	cout << "size(): " << listaCicli.size();
 
+	for(vector<int> v:listaCicli)
+	{
+		for(int i:v)
+			cout << i << " ";
 
+		cout << endl;
+	}
+
+	return 0;
 }
