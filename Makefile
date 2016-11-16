@@ -8,3 +8,8 @@ main: main.cpp
 test: main
 	./$(PROJECT)
 	@rm ./$(PROJECT) && cat output.txt && echo ""
+
+.PHONY: clean
+
+clean:
+	@rm -f *~ $(PROJECT)
