@@ -51,7 +51,7 @@ vector<vector<int>> getCycles(grafo GRAFO)
 
 int main()
 {
-	ifstream in("input.txt");
+	ifstream in("input3.txt");
 
 	int M, L;
 	in >> M >> L;
@@ -82,13 +82,42 @@ int main()
 	cout << "=== CHECK CICLI ===" << endl;
 	cout << "size(): " << listaCicli.size() << endl;
 
+	vector<vector<int>> listaCicli = getCycles(GRAFO);
+
+	cout << "=== CHECK CICLI ===" << endl;
+	cout << "size(): " << listaCicli.size() << endl;
+
+	int mcd = listaCicli[0].size();
+	int min = M;
+
 	for(vector<int> v:listaCicli)
 	{
-		for(int i:v)
-			cout << i << " ";
+					cout << "il ciclo è lungo: " << v.size() << endl;
 
-		cout << endl;
+					if (min > v.size()) {
+									min=v.size();
+					}
+
+					int x = mcd;
+					int y = v.size();
+
+					// Il MCD e` calcolato usando l'algoritmo Euclideo
+					while (y > 0) {
+									int r = x % y;
+									x = y;
+									y = r;
+					}
+
+					mcd = x;
+
+					for(int i:v) {
+									cout << i << " ";
+					}
+					cout << endl;
 	}
+
+	cout << "l'mcd: " << mcd << endl;
+	cout << "il ciclo più lungo: " << min << endl;
 
 	return 0;
 }
