@@ -51,7 +51,7 @@ vector<vector<int>> getCycles(grafo GRAFO)
 
 int main()
 {
-	ifstream in("input3.txt");
+	ifstream in("input.txt");
 
 	int M, L;
 	in >> M >> L;
