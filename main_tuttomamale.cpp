@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -13,21 +14,30 @@ struct nodo {
 typedef vector<nodo> grafo;
 
 // Le sposteremo
-void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli)
+void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli, vector<bool>& visited)
 {
 	GRAFO[u].visited = true;
+	visited[u] = true;
 	for(int k:GRAFO[u].neighbor)
 	{
+		// cout << "=U: " << u << " K: " << k << endl;
 		if(!GRAFO[k].visited && !(GRAFO[k].neighbor.empty()))
 		{
 			ordineVisita.push_back(k);
-			DFS(GRAFO, k, ordineVisita, listaCicli);
+			for(int i:ordineVisita)
+				cout << i << " ";
+
+			cout << endl;
+
+			DFS(GRAFO, k, ordineVisita, listaCicli, visited);
 			ordineVisita.pop_back();
+			GRAFO[k].visited = false;
 		}
 		else
 		{
 			if(k != ordineVisita[ordineVisita.size() - 2])
 			{
+				// cout << "LOOP?" << endl;
 				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
 
@@ -43,89 +53,26 @@ vector<vector<int>> getCycles(grafo GRAFO)
 	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
 
+	vector<bool> visited(GRAFO.size());
+
 	for(size_t i = 0; i < GRAFO.size(); i++)
 	{
-		if(!GRAFO[i].visited)
+		if(!visited[i])
 		{
 			ordineVisita.push_back(i);
-			DFS(GRAFO, i, ordineVisita, listaCicli);
+			DFS(GRAFO, i, ordineVisita, listaCicli, visited);
 		}
 	}
+
+	// ordineVisita.push_back(0);
+	// DFS(GRAFO, 0, ordineVisita, listaCicli, visited);
 
 	return listaCicli;
 }
 
-bool cleanList(int k,grafo GRAFO, vector<int> L1,vector<int> L2){
-	int counter =0;
-	bool res=false;
-	int TMP = GRAFO[k].neighbor.size();
-	for(int i=0;i<GRAFO[k].neighbor.size();i++){
-
-		for(int j=0;j<L1.size();j++)
-			for(int t=0;t<L2.size();t++){
-				if( (GRAFO[k].neighbor[i]==L1[j]) && (GRAFO[k].neighbor[i]==L2[t]) ){
-					counter+=1;
-					if(counter>=2){
-						res=true;
-					}
-					else{cout << "Non ci sono vicini uguali" << endl;}
-				}
-			}
-
-
-	}
-	return res;
-}
-vector<vector<int>> newCycles(vector<vector<int>> & cycleList,grafo & GRAFO){
-
-
-	vector<vector<int>> newCycles2;
-
-	for(int i=0;i<cycleList.size();i++){
-
-		for(int j=i+1;j<cycleList.size();j++)
-		{
-				//controllo se hanno elementi in comune
-				vector<int> commonItems;
-				commonItems.resize(cycleList[i].size());
-				vector<int> tmp;
-			for(int k=0;k<cycleList[i].size();k++)
-			{
-
-				for(int t=0;t<cycleList[j].size();t++)
-				{
-
-						if(!(cycleList[i][k]==cycleList[j][t]&&(cleanList(cycleList[i][k],GRAFO,cycleList[i],cycleList[j])))){
-
-							//commonItems.push_back(cycleList[i][k]);
-							//clean commonItems
-							tmp.push_back(cycleList[i][k]);
-
-
-							}
-				}
-			}
-				newCycles2.push_back(tmp);
-
-
-
-
-		}
-
-
-	}
-
-
-
-
-
-
-return newCycles2;
-
-}
-
 int main()
 {
+
 	ifstream in("input.txt");
 
 	int M, L;
@@ -153,7 +100,6 @@ int main()
 	}
 
 	vector<vector<int>> listaCicli = getCycles(GRAFO);
-	vector<vector<int>> newCicli = newCycles(listaCicli,GRAFO);
 
 	cout << "=== CHECK CICLI ===" << endl;
 	cout << "size(): " << listaCicli.size() << endl;
@@ -185,16 +131,6 @@ int main()
 									cout << i << " ";
 					}
 					cout << endl;
-	}
-
-	cout << "=== CHECK CICLI+ ===" << endl;
-	cout << "size(): " << newCicli.size() << endl;
-
-	for(vector<int> v:newCicli)
-	{
-		for(int i:v)
-			cout << i << " ";
-		cout << endl;
 	}
 
 	cout << "l'mcd: " << mcd << endl;
