@@ -43,15 +43,21 @@ vector<vector<int>> getCycles(grafo GRAFO)
 	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
 
-	ordineVisita.push_back(0);
-	DFS(GRAFO, 0, ordineVisita, listaCicli);
+	for(size_t i = 0; i < GRAFO.size(); i++)
+	{
+		if(!GRAFO[i].visited)
+		{
+			ordineVisita.push_back(i);
+			DFS(GRAFO, i, ordineVisita, listaCicli);
+		}
+	}
 
 	return listaCicli;
 }
 
 int main()
 {
-	ifstream in("input3.txt");
+	ifstream in("input.txt");
 
 	int M, L;
 	in >> M >> L;
@@ -76,11 +82,6 @@ int main()
 
 		cout << endl;
 	}
-
-	vector<vector<int>> listaCicli = getCycles(GRAFO);
-
-	cout << "=== CHECK CICLI ===" << endl;
-	cout << "size(): " << listaCicli.size() << endl;
 
 	vector<vector<int>> listaCicli = getCycles(GRAFO);
 
@@ -118,6 +119,10 @@ int main()
 
 	cout << "l'mcd: " << mcd << endl;
 	cout << "il ciclo più lungo: " << min << endl;
+
+	ofstream out("output.txt");
+	out << mcd << endl;
+	out.close();
 
 	return 0;
 }
