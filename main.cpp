@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -13,21 +14,30 @@ struct nodo {
 typedef vector<nodo> grafo;
 
 // Le sposteremo
-void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli)
+void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli, vector<bool>& visited)
 {
 	GRAFO[u].visited = true;
+	visited[u] = true;
 	for(int k:GRAFO[u].neighbor)
 	{
+		// cout << "=U: " << u << " K: " << k << endl;
 		if(!GRAFO[k].visited && !(GRAFO[k].neighbor.empty()))
 		{
 			ordineVisita.push_back(k);
-			DFS(GRAFO, k, ordineVisita, listaCicli);
+			for(int i:ordineVisita)
+				cout << i << " ";
+
+			cout << endl;
+
+			DFS(GRAFO, k, ordineVisita, listaCicli, visited);
 			ordineVisita.pop_back();
+			GRAFO[k].visited = false;
 		}
 		else
 		{
 			if(k != ordineVisita[ordineVisita.size() - 2])
 			{
+				// cout << "LOOP?" << endl;
 				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
 
@@ -43,21 +53,32 @@ vector<vector<int>> getCycles(grafo GRAFO)
 	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
 
+	vector<bool> visited(GRAFO.size());
+
 	for(size_t i = 0; i < GRAFO.size(); i++)
 	{
-		if(!GRAFO[i].visited)
+		if(!visited[i])
 		{
 			ordineVisita.push_back(i);
-			DFS(GRAFO, i, ordineVisita, listaCicli);
+			DFS(GRAFO, i, ordineVisita, listaCicli, visited);
 		}
 	}
+
+	// ordineVisita.push_back(0);
+	// DFS(GRAFO, 0, ordineVisita, listaCicli, visited);
 
 	return listaCicli;
 }
 
 int main()
 {
-	ifstream in("input.txt");
+	string path = "input/input";
+	int N;
+	cout << "Input N: ";
+	cin >> N;
+	path += to_string(N) + ".txt";
+
+	ifstream in(path);
 
 	int M, L;
 	in >> M >> L;
