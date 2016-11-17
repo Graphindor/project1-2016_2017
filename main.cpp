@@ -11,24 +11,31 @@ struct nodo {
 	bool visited = false;
 };
 
-typedef vector<nodo> grafo;
+typedef vector<nodo> grafo_t;
+
+typedef vector<vector<int>> species_t;
+
+bool contains(vector<int> target, vector<vector<int>> source)
+{
+	for(vector<int> v:source)
+	{
+		if(target == v)
+			return true;
+	}
+
+	return false;
+}
 
 // Le sposteremo
-void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli, vector<bool>& visited)
+void DFS(grafo_t& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli, vector<bool>& visited)
 {
 	GRAFO[u].visited = true;
 	visited[u] = true;
 	for(int k:GRAFO[u].neighbor)
 	{
-		// cout << "=U: " << u << " K: " << k << endl;
 		if(!GRAFO[k].visited && !(GRAFO[k].neighbor.empty()))
 		{
 			ordineVisita.push_back(k);
-			for(int i:ordineVisita)
-				cout << i << " ";
-
-			cout << endl;
-
 			DFS(GRAFO, k, ordineVisita, listaCicli, visited);
 			ordineVisita.pop_back();
 			GRAFO[k].visited = false;
@@ -37,18 +44,22 @@ void DFS(grafo& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& li
 		{
 			if(k != ordineVisita[ordineVisita.size() - 2])
 			{
-				// cout << "LOOP?" << endl;
 				unsigned int pos = find(ordineVisita.begin(), ordineVisita.end(), k) - ordineVisita.begin();
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
 
 				if(!toPush.empty())
-					listaCicli.push_back(toPush);
+				{
+					vector<int> rev(toPush.begin(), toPush.end());
+					reverse(rev.begin() + 1, rev.end());
+					if(!contains(toPush, listaCicli) && !contains(rev, listaCicli))
+						listaCicli.push_back(toPush);
+				}
 			}
 		}
 	}
 }
 
-vector<vector<int>> getCycles(grafo GRAFO)
+vector<vector<int>> getCycles(grafo_t& GRAFO)
 {
 	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
@@ -64,21 +75,21 @@ vector<vector<int>> getCycles(grafo GRAFO)
 		}
 	}
 
-	// ordineVisita.push_back(0);
-	// DFS(GRAFO, 0, ordineVisita, listaCicli, visited);
-
 	return listaCicli;
 }
 
 int main()
 {
 
-	ifstream in("input.txt");
+	ifstream in("input/input0.txt");
 
 	int M, L;
 	in >> M >> L;
 
-	grafo GRAFO(M);
+	grafo_t GRAFO(M);
+	species_t species(M);
+	for(int i = 0; i < M; i++)
+		species[i].resize(M);
 
 	for(int i = 0; i < L; i++)
 	{
@@ -94,51 +105,39 @@ int main()
 	{
 		cout << i << ": ";
 		for(int j:GRAFO[i].neighbor)
-			cout << j << " ";
+			cout << "[" << j << ", " << species[i][j] << "]";
 
 		cout << endl;
 	}
 
-	vector<vector<int>> listaCicli = getCycles(GRAFO);
-
-	cout << "=== CHECK CICLI ===" << endl;
-	cout << "size(): " << listaCicli.size() << endl;
-
-	int mcd = listaCicli[0].size();
-	int min = M;
-
-	for(vector<int> v:listaCicli)
+	cout << endl << "=== CHECK SPECIES ===" << endl;
+	for(vector<int> y:species)
 	{
-					cout << "il ciclo è lungo: " << v.size() << endl;
+		for(int x:y)
+			cout << x << " ";
 
-					if (min > v.size()) {
-									min=v.size();
-					}
-
-					int x = mcd;
-					int y = v.size();
-
-					// Il MCD e` calcolato usando l'algoritmo Euclideo
-					while (y > 0) {
-									int r = x % y;
-									x = y;
-									y = r;
-					}
-
-					mcd = x;
-
-					for(int i:v) {
-									cout << i << " ";
-					}
-					cout << endl;
+		cout << endl;
 	}
 
-	cout << "l'mcd: " << mcd << endl;
-	cout << "il ciclo più lungo: " << min << endl;
+	cout << endl << "=== FIND CYCLES===" << endl;
+	vector<vector<int>> cycleList = getCycles(GRAFO);
 
-	ofstream out("output.txt");
-	out << mcd << endl;
-	out.close();
+	for(vector<int> v:cycleList)
+	{
+		for(int i:v)
+			cout << i << " ";
+
+		cout << endl;
+	}
+
+	cout << endl << "=== CHECK SPECIES POST ===" << endl;
+	for(vector<int> y:species)
+	{
+		for(int x:y)
+			cout << x << " ";
+
+		cout << endl;
+	}
 
 	return 0;
 }
