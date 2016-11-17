@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <utility>
 
 using namespace std;
 
@@ -81,13 +82,16 @@ vector<vector<int>> getCycles(grafo_t& GRAFO)
 int main()
 {
 
-	ifstream in("input/input0.txt");
+	ifstream in("input.txt");
 
 	int M, L;
 	in >> M >> L;
 
 	grafo_t GRAFO(M);
 	species_t species(M);
+	vector<pair<int, int>> edges;
+
+
 	for(int i = 0; i < M; i++)
 		species[i].resize(M);
 
@@ -96,11 +100,14 @@ int main()
 		int src, dest;
 		in >> src >> dest;
 
+		pair<int, int> edge(src, dest);
+
+		edges.push_back(edge);
 		GRAFO[src].neighbor.push_back(dest);
 		GRAFO[dest].neighbor.push_back(src);
 	}
 
-	cout << "=== CHECK GRAFO ===" << endl;
+	cout << endl << "=== CHECK GRAFO ===" << endl;
 	for(unsigned int i = 0; i < GRAFO.size(); i++)
 	{
 		cout << i << ": ";
@@ -110,34 +117,89 @@ int main()
 		cout << endl;
 	}
 
-	cout << endl << "=== CHECK SPECIES ===" << endl;
-	for(vector<int> y:species)
-	{
-		for(int x:y)
-			cout << x << " ";
-
-		cout << endl;
-	}
-
 	cout << endl << "=== FIND CYCLES===" << endl;
 	vector<vector<int>> cycleList = getCycles(GRAFO);
 
+	int x = 1;
 	for(vector<int> v:cycleList)
 	{
+		cout << "[" << x++ << "] ";
 		for(int i:v)
 			cout << i << " ";
 
 		cout << endl;
 	}
 
-	cout << endl << "=== CHECK SPECIES POST ===" << endl;
-	for(vector<int> y:species)
-	{
-		for(int x:y)
-			cout << x << " ";
+	unsigned int mcd = cycleList[0].size();
+	unsigned int min = M;
 
-		cout << endl;
+	for(vector<int> v:cycleList)
+	{
+		if(min > v.size())
+			min = v.size();
+
+		int x = mcd;
+		int y = v.size();
+
+		// Il MCD e` calcolato usando l'algoritmo Euclideo
+		while (y > 0) {
+			int r = x % y;
+			x = y;
+			y = r;
+		}
+
+		mcd = x;
 	}
+
+	cout << "MCD: " << mcd << endl;
+	vector<int> MCDS;
+	for(unsigned int i = 1; i <= (mcd / 2); i++)
+		if((mcd % i) == 0)
+			MCDS.push_back(i);
+
+	MCDS.push_back(mcd);
+	reverse(MCDS.begin(), MCDS.end());
+
+	cout << "MCDS: ";
+	for(int m:MCDS)
+		cout << m << " ";
+	cout << endl;
+
+	for(vector<int> cycle:cycleList)
+	{
+		int current = 0;
+		cycle.push_back(cycle[0]);
+		for(unsigned int i = 0; i < cycle.size() - 1; i++)
+		{
+
+			current %= mcd;
+
+			int n1, n2;
+			n1 = cycle[i];
+			n2 = cycle[i + 1];
+
+			int* sp1 = &(species[n1][n2]);
+			int* sp2 = &(species[n2][n1]);
+
+			*sp1 = current + 1;
+			*sp2 = current + 1;
+			current++;
+		}
+	}
+
+	cout << endl << "=== CHECK SPECIES ===" << endl;
+
+	ofstream out("output.txt");
+
+	out << mcd << endl;
+	for(pair<int, int> edge:edges)
+	{
+		int spec = species[edge.first][edge.second] - 1;
+		cout << edge.first << ", " << edge.second << " - " << spec << endl;
+		out << ((spec < 0) ? 0 : spec) << endl;
+	}
+
+	out.close();
 
 	return 0;
 }
