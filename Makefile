@@ -9,10 +9,6 @@ test: main
 	./$(PROJECT)
 	@rm ./$(PROJECT) && cat output.txt && echo ""
 
-test2: main2
-	./$(PROJECT)
-	@rm ./$(PROJECT) && cat output.txt && echo ""
-
 .PHONY: clean
 
 clean:
