@@ -16,30 +16,17 @@ typedef vector<nodo> grafo_t;
 
 typedef vector<vector<int>> species_t;
 
-bool contains(vector<int> target, vector<vector<int>> source)
-{
-	for(vector<int> v:source)
-	{
-		if(target == v)
-			return true;
-	}
-
-	return false;
-}
-
 // Le sposteremo
-void DFS(grafo_t& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli, vector<bool>& visited)
+void DFS(grafo_t& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& listaCicli)
 {
 	GRAFO[u].visited = true;
-	visited[u] = true;
 	for(int k:GRAFO[u].neighbor)
 	{
 		if(!GRAFO[k].visited && !(GRAFO[k].neighbor.empty()))
 		{
 			ordineVisita.push_back(k);
-			DFS(GRAFO, k, ordineVisita, listaCicli, visited);
+			DFS(GRAFO, k, ordineVisita, listaCicli);
 			ordineVisita.pop_back();
-			GRAFO[k].visited = false;
 		}
 		else
 		{
@@ -49,12 +36,7 @@ void DFS(grafo_t& GRAFO, int u, vector<int>& ordineVisita, vector<vector<int>>& 
 				vector<int> toPush(ordineVisita.begin() + pos, ordineVisita.end());
 
 				if(!toPush.empty())
-				{
-					vector<int> rev(toPush.begin(), toPush.end());
-					reverse(rev.begin() + 1, rev.end());
-					if(!contains(toPush, listaCicli) && !contains(rev, listaCicli))
-						listaCicli.push_back(toPush);
-				}
+					listaCicli.push_back(toPush);
 			}
 		}
 	}
@@ -65,18 +47,26 @@ vector<vector<int>> getCycles(grafo_t& GRAFO)
 	vector<vector<int>> listaCicli;
 	vector<int> ordineVisita;
 
-	vector<bool> visited(GRAFO.size());
-
 	for(size_t i = 0; i < GRAFO.size(); i++)
-	{
-		if(!visited[i])
+		if(!GRAFO[i].visited)
 		{
 			ordineVisita.push_back(i);
-			DFS(GRAFO, i, ordineVisita, listaCicli, visited);
+			DFS(GRAFO, i, ordineVisita, listaCicli);
 		}
-	}
 
 	return listaCicli;
+}
+
+int MCD(unsigned int x, unsigned int y)
+{
+	while(y != 0)
+	{
+		unsigned int z = x % y;
+		x = y;
+		y = z;
+	}
+
+	return x;
 }
 
 int main()
@@ -130,25 +120,48 @@ int main()
 		cout << endl;
 	}
 
+	// unsigned int mcd = cycleList[0].size();
+	// unsigned int min = M;
+
+	// for(vector<int> v:cycleList)
+	// {
+	// 	if(min > v.size())
+	// 		min = v.size();
+	//
+	// 	int x = mcd;
+	// 	int y = v.size();
+	//
+	// 	// Il MCD e` calcolato usando l'algoritmo Euclideo
+	// 	while (y > 0) {
+	// 		int r = x % y;
+	// 		x = y;
+	// 		y = r;
+	// 	}
+	//
+	// 	mcd = x;
+	// }
+
 	unsigned int mcd = cycleList[0].size();
-	unsigned int min = M;
-
-	for(vector<int> v:cycleList)
+	for(unsigned int i = 0; i < cycleList.size() - 1; i++)
 	{
-		if(min > v.size())
-			min = v.size();
+		unsigned int _mcd = mcd;
+		mcd = MCD(cycleList[i].size(), cycleList[i + 1].size());
+		mcd = MCD(mcd, _mcd);
 
-		int x = mcd;
-		int y = v.size();
-
-		// Il MCD e` calcolato usando l'algoritmo Euclideo
-		while (y > 0) {
-			int r = x % y;
-			x = y;
-			y = r;
+		unsigned int common_arch = 0;
+		for(int z:cycleList[i])
+		{
+			for(int j:cycleList[i + 1])
+			{
+				if(z == j)
+					common_arch++;
+			}
 		}
+		common_arch = (common_arch > 0) ? common_arch - 1 : 0;
 
-		mcd = x;
+		cout << common_arch << endl;
+
+		mcd = MCD(mcd, cycleList[i].size() + cycleList[i + 1].size() - common_arch);
 	}
 
 	cout << "MCD: " << mcd << endl;
